@@ -35,12 +35,22 @@ const loginController = asyncHandler(async (req, res) => {
             username: user.username,
             email: user.email,
             fullname: user.fullname
-        });
+            },
+            {
+                headers: {
+                    'x-login-service-secret': process.env.TOKEN_SERVICE_SECRET
+                }
+            }
+        );
         op4()
         if (!tokenRes){
             throw new ApiError(400, "Something fishy in token response")
         }
         const {accessToken, refreshToken} = tokenRes.data
+        user.refreshToken = refreshToken
+        const op5 = mongoOP.startTimer({operation: "save_refresh_token", type: "save"})
+        await user.save({validateBeforeSave: false})
+        op5()
         const op2 = mongoOP.startTimer({operation: "looged_in_user", type: "findById"})
         const loggedUser = await User.findById(user._id).select("-password -refreshToken")
         op2()
@@ -57,7 +67,7 @@ const loginController = asyncHandler(async (req, res) => {
             refreshToken
         }, "User Logged In Sucessfully"))
     } catch (error) {
-        throw new ApiError (400, "Something messy while trying to login")
+        throw new ApiError (400, error?.message)
     }
 })
 

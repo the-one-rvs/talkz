@@ -19,24 +19,6 @@ export const httpRequestDurationHistogram = new client.Histogram({
 });
 register.registerMetric(httpRequestDurationHistogram);
 
-export const loginSuccessCounter = new client.Counter({
-  name: "talkz_login_success_total",
-  help: "Number of successful user logins",
-});
-register.registerMetric(loginSuccessCounter);
-
-export const loginDurationSeconds = new client.Histogram({
-    name: "talkz_login_duration_seconds",
-    help: "Summary of Login Duration",
-    buckets: [5, 10, 50, 100, 150, , 250, 500]
-});
-register.registerMetric(loginDurationSeconds);
-
-export const tokenResponseDuration = new client.Histogram({
-  name: "talkz_token_response_seconds",
-  help: "The Response time from token genration"
-})
-register.registerMetric(tokenResponseDuration)
 
 export const mongoOP = new client.Histogram({
   name: "talkz_mongodb_operations_seconds",
