@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import redis from "../utils/redisClient.js";
 import mongoose from "mongoose";
+import { accessTokenCreateCounter, reclaimTokenCreationDuration, refreshTokenCreateCounter, tokenCreationDuration } from "../metrics.js";
 
 const genratetokens = asyncHandler(async (req,res) => {
     try {
@@ -11,6 +12,7 @@ const genratetokens = asyncHandler(async (req,res) => {
         if (!userId && !username && !email && !fullname){
             throw new ApiError(400, "Please pass all required fields")
         }
+        const op = tokenCreationDuration.startTimer()
         const accessToken = jwt.sign(
             {
                 _id: userId,
@@ -33,6 +35,9 @@ const genratetokens = asyncHandler(async (req,res) => {
                 expiresIn: process.env.REFRESH_TOKEN_EXPIRY
             }
         )
+        op()
+        accessTokenCreateCounter.inc()
+        refreshTokenCreateCounter.inc()
         return res.status(200).json( new ApiResponse(200,{
             refreshToken: refreshToken,
             accessToken: accessToken
@@ -56,6 +61,7 @@ const reclaimTokens = asyncHandler(async (req,res) => {
     if (!user) {
         throw new ApiError(400, "Refresh Token not found in user collection");
     }
+    const op = reclaimTokenCreationDuration.startTimer()
     const accessToken = jwt.sign(
         {
             _id: req.user._id,
@@ -68,7 +74,9 @@ const reclaimTokens = asyncHandler(async (req,res) => {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
     )
-    return res.status(200).json(new ApiResponse (200, {accessToken}, "Access Token Refreshed"))
+    op()
+    accessTokenCreateCounter.inc()
+    return res.status(200).json(new ApiResponse (200, {accessToken: accessToken}, "Access Token Refreshed"))
 })
 
 export {
