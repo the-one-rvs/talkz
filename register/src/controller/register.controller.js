@@ -3,6 +3,7 @@ import { User } from "../model/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { mongoOP, registerDurationSeconds, registerSuccessCounter } from "../metrics.js";
+import redis from "../utils/redisClient.js";
 
 const registerUser = asyncHandler(async (req,res) => {
     const {username, email, fullname, password} = req.body;
@@ -34,6 +35,7 @@ const registerUser = asyncHandler(async (req,res) => {
     op3();
     registerSuccessCounter.inc();
     op4();
+    await redis.set(`user:${createdUser._id}:profile`, JSON.stringify(createdUser), "EX", 3600);
     return res.status(200).json(new ApiResponse(200, createdUser, "User Created !!"))
 })
 
