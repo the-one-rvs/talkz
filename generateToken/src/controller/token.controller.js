@@ -2,7 +2,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
-import redis from "../utils/redisClient.js";
 import mongoose from "mongoose";
 import { accessTokenCreateCounter, reclaimTokenCreationDuration, refreshTokenCreateCounter, tokenCreationDuration } from "../metrics.js";
 
