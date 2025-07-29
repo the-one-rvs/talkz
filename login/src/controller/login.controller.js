@@ -19,8 +19,9 @@ const loginController = asyncHandler(async (req, res) => {
        }
        const op = mongoOP.startTimer({operation : "find_user", type: "findOne"});
        const user = await User.findOne({
-        $or : [{username, email}]
+        $or: [{username}, {email}]
        })
+       //    console.log(`${user}`)
        op()
        if (!user){
         throw new ApiError(400, "User not exsists")
@@ -46,7 +47,7 @@ const loginController = asyncHandler(async (req, res) => {
         if (!tokenRes){
             throw new ApiError(400, "Something fishy in token response")
         }
-        const {accessToken, refreshToken} = tokenRes.data
+        const { accessToken, refreshToken } = tokenRes.data.data;
         user.refreshToken = refreshToken
         const op5 = mongoOP.startTimer({operation: "save_refresh_token", type: "save"})
         await user.save({validateBeforeSave: false})
