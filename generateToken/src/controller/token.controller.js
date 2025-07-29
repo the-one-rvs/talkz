@@ -74,6 +74,8 @@ const reclaimTokens = asyncHandler(async (req,res) => {
         }
     )
     op()
+    res.setHeader("x-access-token", accessToken)
+    res.setHeader("x-refresh-token", refreshToken)
     accessTokenCreateCounter.inc()
     return res.status(200).json(new ApiResponse (200, {accessToken: accessToken}, "Access Token Refreshed"))
 })

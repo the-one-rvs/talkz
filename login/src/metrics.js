@@ -28,10 +28,10 @@ register.registerMetric(loginSuccessCounter);
 export const loginDurationSeconds = new client.Histogram({
     name: "talkz_loginService_login_duration_seconds",
     help: "Summary of Login Duration",
-    buckets: [5, 10, 50, 100, 150, , 250, 500]
+    buckets: [5, 10, 50, 100, 150, 250, 500] // <-- fixed
 });
-register.registerMetric(loginDurationSeconds);
 
+register.registerMetric(loginDurationSeconds);
 export const tokenResponseDuration = new client.Histogram({
   name: "talkz_loginService_token_response_seconds",
   help: "The Response time from token genration"

@@ -11,9 +11,12 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
         }
     
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    
-        const user = await mongoose.connection.db.collection("users").findOne(decodedToken?.username).select("-password -refreshToken");
-    
+        
+        console.log(decodedToken.username)
+        const user = await mongoose.connection.db.collection("users").findOne({
+            username: decodedToken?.username
+        });
+
         if (!user) {
             throw new ApiError(401, "Invalid Access Token")
         }
