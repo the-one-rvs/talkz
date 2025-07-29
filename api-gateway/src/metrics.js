@@ -19,4 +19,11 @@ export const httpRequestDurationHistogram = new client.Histogram({
 });
 register.registerMetric(httpRequestDurationHistogram);
 
+export const mongoDBConnect = new client.Histogram({
+  name: "talkz_gateway_mongo_connection",
+  help: "Duration of Mongo Connections",
+  buckets: [0.005, 0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5, 10, 50]
+})
+register.registerMetric(mongoDBConnect)
+
 export { register }

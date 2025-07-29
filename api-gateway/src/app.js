@@ -16,5 +16,19 @@ app.get("/metrics", async (req, res) => {
   res.end(await register.metrics());
 });
 
+import proxy from "express-http-proxy";
+import { verifyJWT } from "./middleware/authZ.middleware.js";
+
+app.use("/registerService", proxy(process.env.REGISTER_USER_WEB));
+app.use("/generateTokenService", verifyJWT, proxy(process.env.TOKEN_GENRATE_WEB));
+
+app.use("/loginService", proxy(process.env.LOGIN_USER_WEB, {
+  proxyReqPathResolver: req => "/login",
+  userResDecorator: async (proxyRes, proxyResData, req, res) => {
+    interceptLoginResponse(proxyRes, req, res);
+    return proxyResData; 
+  }
+}));
+
 
 export { app }
