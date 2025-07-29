@@ -60,6 +60,8 @@ const loginController = asyncHandler(async (req, res) => {
         await redis.set(`user:${loggedUser._id}:profile`, JSON.stringify(loggedUser), "EX", 3600);
         op3()
         loginSuccessCounter.inc()
+        res.setHeader("x-access-token", accessToken)
+        res.setHeader("x-refresh-token", refreshToken)
         return res.status(200)
         .json( new ApiResponse(200,{
             user: loggedUser,
