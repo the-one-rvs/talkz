@@ -1,6 +1,6 @@
 import proxy from "express-http-proxy";
 import { verifyJWT } from "./middleware/authZ.middleware.js";
-import { interceptResponse } from "./middleware/cookieSetup.middleware.js";
+import { interceptResponse } from "./decorator/cookieSetup.decorator.js";
 
 export function setProxies(app)  {
     app.use("/registerService", proxy(process.env.REGISTER_USER_WEB));

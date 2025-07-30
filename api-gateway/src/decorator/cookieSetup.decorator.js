@@ -8,9 +8,17 @@ export const interceptResponse = (proxyRes, req, res) => {
 
   if (accessToken) {
     res.cookie("accessToken", accessToken, options);
+    res.removeHeader?.("x-access-token");
   }
 
   if (refreshToken) {
     res.cookie("refreshToken", refreshToken, options);
+    res.removeHeader?.("x-refresh-token");
+  }
+  if (proxyRes.headers['set-cookie']) {
+    delete proxyRes.headers['set-cookie'];
+  }
+  if (proxyRes.headers['Set-Cookie']) {
+    delete proxyRes.headers['Set-Cookie'];
   }
 };

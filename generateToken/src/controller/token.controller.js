@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { accessTokenCreateCounter, reclaimTokenCreationDuration, refreshTokenCreateCounter, tokenCreationDuration } from "../metrics.js";
+import { User } from "../model/user.model.js";
 
 const genratetokens = asyncHandler(async (req,res) => {
     try {
@@ -47,38 +48,72 @@ const genratetokens = asyncHandler(async (req,res) => {
 })
 
 const reclaimTokens = asyncHandler(async (req,res) => {
-    const refreshToken = req.user.refreshToken
-    if (! refreshToken){
-        throw new ApiError(400, "Refresh Token is not in user request")
-    }
-    const user = await mongoose.connection.db.collection("users").findOne({
-        refreshToken: refreshToken
-    });
-    if (user._id!==req.user._id) {
-        throw new ApiError(400, "Something fishy token not found for logged in user")
-    }
-    if (!user) {
-        throw new ApiError(400, "Refresh Token not found in user collection");
-    }
-    const op = reclaimTokenCreationDuration.startTimer()
-    const accessToken = jwt.sign(
-        {
-            _id: req.user._id,
-            email: req.user.email,
-            username: req.user.username,
-            fullName: req.user.fullname,
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+    // console.log(req.cookies)
+    try {
+        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+        
+        if (!incomingRefreshToken){
+            throw new ApiError(401, "Unauth Request")
         }
-    )
-    op()
-    res.setHeader("x-access-token", accessToken)
-    res.setHeader("x-refresh-token", refreshToken)
-    accessTokenCreateCounter.inc()
-    return res.status(200).json(new ApiResponse (200, {accessToken: accessToken}, "Access Token Refreshed"))
-})
+    
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+    
+        const user = await User.findById(decodedToken?._id)
+    
+        if (!user){
+            throw new ApiError(401, "Invalid refresh token")
+        }
+    
+        if (incomingRefreshToken !== user?.refreshToken){
+            throw new ApiError(401, "Refresh Token is expired or used")
+        }
+    
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+    
+        const accessToken = jwt.sign(
+            {
+                _id: decodedToken._id,
+                email: decodedToken.email,
+                username: decodedToken.username,
+                fullName: decodedToken.fullname,
+            },
+            process.env.ACCESS_TOKEN_SECRET,
+            {
+                expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+            }
+        )
+        const newRefreshToken = jwt.sign(
+            {
+                _id: decodedToken._id,
+                
+            },
+            process.env.REFRESH_TOKEN_SECRET,
+            {
+                expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+            }
+        )
+        user.refreshToken = newRefreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        res.setHeader("x-access-token", accessToken);
+        res.setHeader("x-refresh-token", newRefreshToken);
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {accessToken, refreshToken: newRefreshToken},
+                "Access Token refreshed"
+            )
+        )
+    } catch (error) {
+        throw new ApiError(401, error?.message|| "Invalid Refresh Token")
+    }
+}
+)
 
 export {
     genratetokens
