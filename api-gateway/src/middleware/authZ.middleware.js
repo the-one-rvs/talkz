@@ -2,6 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken"
 import { User } from "../model/user.model.js"
+import { mongoOP } from "../metrics.js";
 
 export const verifyJWT = asyncHandler(async(req, _, next) => {
     try {
@@ -14,9 +15,9 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
         
         console.log(decodedToken)
-
+        const op = mongoOP.startTimer({operation: "find_user_from_token", type: "findById"})
         const user = await User.findById(decodedToken._id).select(" -password ")
-
+        op()
 
         if (!user) {
             throw new ApiError(401, "Invalid Access Token")

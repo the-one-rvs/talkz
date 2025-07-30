@@ -1,4 +1,7 @@
+import { cookieCounter, cookieTimer } from "../metrics.js";
+
 export const interceptResponse = (proxyRes, req, res) => {
+  const op = cookieTimer.startTimer();
   const accessToken = proxyRes.headers['x-access-token'];
   const refreshToken = proxyRes.headers['x-refresh-token'];
   const options = {
@@ -21,4 +24,6 @@ export const interceptResponse = (proxyRes, req, res) => {
   if (proxyRes.headers['Set-Cookie']) {
     delete proxyRes.headers['Set-Cookie'];
   }
+  op()
+  cookieCounter.inc()
 };

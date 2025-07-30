@@ -5,7 +5,7 @@ import cors from "cors";
 app.use(prometheusMiddleware);
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
-    credential: true
+    credentials: true
 }))
 app.use(express.json({limit: "20kb"}))
 app.use(express.urlencoded({extended: true, limit: "20kb" }))

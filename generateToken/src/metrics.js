@@ -26,12 +26,6 @@ export const tokenCreationDuration = new client.Histogram({
 })
 register.registerMetric(tokenCreationDuration)
 
-export const reclaimTokenCreationDuration = new client.Histogram({
-  name: "talkz_generateToken_reclaim_token_creation_duration",
-  help: "Just Counting Token Recreation Time",
-  buckets: [1, 5, 10, 50, 100, 250, 500]
-})
-
 export const accessTokenCreateCounter = new client.Counter({
   name: "talkz_generateToken_access_token_total",
   help: "Times Access Token Created"

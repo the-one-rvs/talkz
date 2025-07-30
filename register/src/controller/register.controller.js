@@ -33,8 +33,8 @@ const registerUser = asyncHandler(async (req,res) => {
         "-password -refreshToken"
     )
     op3();
-    registerSuccessCounter.inc();
     op4();
+    registerSuccessCounter.inc();
     await redis.set(`user:${createdUser._id}:profile`, JSON.stringify(createdUser), "EX", 3600);
     return res.status(200).json(new ApiResponse(200, createdUser, "User Created !!"))
 })

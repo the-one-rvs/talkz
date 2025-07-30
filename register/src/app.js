@@ -5,13 +5,13 @@ import cors from "cors";
 app.use(prometheusMiddleware);
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
-    credential: true
+    credentials: true
 }))
 app.use(express.json({limit: "20kb"}))
 app.use(express.urlencoded({extended: true, limit: "20kb" }))
 
 import { register } from "./metrics.js";
-app.get("/metrics", async (req, res) => {
+app.get("/metrics",  async (req, res) => {
   res.set("Content-Type", register.contentType);
   res.end(await register.metrics());
 });

@@ -2,8 +2,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
-import { accessTokenCreateCounter, reclaimTokenCreationDuration, refreshTokenCreateCounter, tokenCreationDuration } from "../metrics.js";
+import { accessTokenCreateCounter, mongoOP, refreshTokenCreateCounter, tokenCreationDuration } from "../metrics.js";
 import { User } from "../model/user.model.js";
 
 const genratetokens = asyncHandler(async (req,res) => {
@@ -48,7 +47,6 @@ const genratetokens = asyncHandler(async (req,res) => {
 })
 
 const reclaimTokens = asyncHandler(async (req,res) => {
-    // console.log(req.cookies)
     try {
         const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
         
@@ -57,9 +55,9 @@ const reclaimTokens = asyncHandler(async (req,res) => {
         }
     
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
-    
+        const op2 = mongoOP.startTimer({operation: "find user by decoded token", type: "findById"})
         const user = await User.findById(decodedToken?._id)
-    
+        op2()
         if (!user){
             throw new ApiError(401, "Invalid refresh token")
         }
@@ -72,7 +70,7 @@ const reclaimTokens = asyncHandler(async (req,res) => {
             httpOnly: true,
             secure: true
         }
-    
+        const op = tokenCreationDuration.startTimer();
         const accessToken = jwt.sign(
             {
                 _id: decodedToken._id,
@@ -95,9 +93,11 @@ const reclaimTokens = asyncHandler(async (req,res) => {
                 expiresIn: process.env.REFRESH_TOKEN_EXPIRY
             }
         )
+        op();
         user.refreshToken = newRefreshToken;
+        const op3 = mongoOP.startTimer({operation: "Save Refresh Token", type: "save"})
         await user.save({ validateBeforeSave: false });
-
+        op3()
         res.setHeader("x-access-token", accessToken);
         res.setHeader("x-refresh-token", newRefreshToken);
         return res
