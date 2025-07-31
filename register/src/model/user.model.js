@@ -28,8 +28,11 @@ const userSchema = new Schema (
             type: String
         },
         password: {
-            type: String,
-            required: [true, 'Password is required']
+            type: String
+        },
+        onlyOAuth : {
+            type: Boolean,
+            default: false
         },
         refreshToken: {
             type: String

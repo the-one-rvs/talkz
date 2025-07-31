@@ -5,6 +5,7 @@ import { loginDurationSeconds, loginSuccessCounter, mongoOP, tokenResponseDurati
 import { ApiResponse } from "../utils/ApiResponse.js";
 import axios from "axios";
 import redis from "../utils/redisClient.js";
+import jwt from "jsonwebtoken";
 
 
 const loginController = asyncHandler(async (req, res) => {
@@ -23,6 +24,9 @@ const loginController = asyncHandler(async (req, res) => {
        })
        //    console.log(`${user}`)
        op()
+       if (user.onlyOAuth == true){
+        throw new ApiError(400, "User should register for login through password, He has only looged in using oAuth")
+       }
        if (!user){
         throw new ApiError(400, "User not exsists")
        }
@@ -31,7 +35,14 @@ const loginController = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Password not matches Try Again!")
        }
        const op4 = tokenResponseDuration.startTimer()
-       const tokenRes = await axios.post(process.env.TOKEN_IP, {
+       const headerToken = jwt.sign({
+            service: "login"
+            
+        },process.env.TOKEN_SERVICE_SECRET,
+        {
+            expiresIn: process.env.TOKEN_EXPIRY
+        })
+        const tokenRes = await axios.post(process.env.TOKEN_IP, {
             userId: user._id,
             username: user.username,
             email: user.email,
@@ -39,7 +50,7 @@ const loginController = asyncHandler(async (req, res) => {
             },
             {
                 headers: {
-                    'x-login-service-secret': process.env.TOKEN_SERVICE_SECRET
+                    'x-oAuth-service-secret': headerToken
                 }
             }
         );
