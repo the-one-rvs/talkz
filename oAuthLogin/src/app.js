@@ -2,7 +2,6 @@ import express from "express";
 const app = express()
 import { prometheusMiddleware } from "./middleware/prom.middleware.js";
 import cors from "cors";
-import passport from "passport";
 app.use(prometheusMiddleware);
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
@@ -16,6 +15,8 @@ app.get("/metrics",  async (req, res) => {
   res.set("Content-Type", register.contentType);
   res.end(await register.metrics());
 });
+
+import passport from "./middleware/passport.middleware.js";
 
 app.use(passport.initialize());
 import oauthRouter from "./routes/oauth.route.js"

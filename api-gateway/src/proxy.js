@@ -19,4 +19,13 @@ export function setProxies(app)  {
         return proxyResData; 
     }
     }));
+
+    app.use("/oAuthService", proxy(process.env.OAUTH_WEB, {
+    proxyReqPathResolver: req => req.originalUrl.replace("/oAuthService", ""),
+    userResDecorator: async (proxyRes, proxyResData, req, res) => {
+        interceptResponse(proxyRes, req, res);
+        return proxyResData;
+    }
+}));
+
 }

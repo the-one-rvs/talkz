@@ -50,7 +50,7 @@ const loginController = asyncHandler(async (req, res) => {
             },
             {
                 headers: {
-                    'x-oAuth-service-secret': headerToken
+                    'x-service-secret': headerToken
                 }
             }
         );

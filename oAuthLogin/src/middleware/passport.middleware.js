@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { User } from "../models/user.models.js";
+import { User } from "../model/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { mongoOP, oauthcallback, oauthduration } from "../metrics.js";
 
@@ -36,7 +36,6 @@ passport.use(new GoogleStrategy({
                 onlyOAuth: true
             });
             op3()
-            throw new ApiError (400, " User Not Created Before By Admin")
         }
 
         if (!user) {

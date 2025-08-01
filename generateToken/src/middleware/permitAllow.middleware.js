@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 const checkPermitedService = asyncHandler(async (req,res, next) => {
     try {
-        const serviceSecret = req.headers['x-login-service-secret'];
+        const serviceSecret = req.headers['x-service-secret'];
         
         const decodedToken = jwt.verify(serviceSecret, process.env.TOKEN_SERVICE_SECRET)
 
