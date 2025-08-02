@@ -30,6 +30,10 @@ const userSchema = new Schema (
         password: {
             type: String
         },
+        isVerified: {
+            type: Boolean,
+            default: false
+        },
         onlyOAuth : {
             type: Boolean,
             default: false

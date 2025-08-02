@@ -27,6 +27,9 @@ const loginController = asyncHandler(async (req, res) => {
        if (user.onlyOAuth == true){
         throw new ApiError(400, "User should register for login through password, He has only looged in using oAuth")
        }
+       if (user.isVerified == false){
+        throw new ApiError(400, "User Email not verified")
+       }
        if (!user){
         throw new ApiError(400, "User not exsists")
        }

@@ -26,6 +26,10 @@ const userSchema = new Schema (
         googleid : {
             type: String
         },
+        isVerified: {
+            type: Boolean,
+            default: false
+        },
         password: {
             type: String,
             required: [true, 'Password is required']
