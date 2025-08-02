@@ -22,6 +22,8 @@ const registerUser = asyncHandler(async (req,res) => {
     if (existingUser){
         throw new ApiError(400, "User Already Exsist !!!")
     }
+    const token = jwt.sign({ email }, process.env.JWT_EMAIL_SECRET, { expiresIn: "1h" });
+    sendVerificationEmail(email, token)
     const op1 = mongoOP.startTimer({operation : "creating_user", type: "create"})
     const user = await User.create({
         username: username,
@@ -31,8 +33,6 @@ const registerUser = asyncHandler(async (req,res) => {
         isVerified: false
     })
     op1()
-    const token = jwt.sign(email, process.env.JWT_EMAIL_SECRET, { expiresIn: "1h" });
-    sendVerificationEmail(email, token)
     const op3 = mongoOP.startTimer({operation : "find_created_user", type: "findById"});
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
@@ -78,7 +78,7 @@ const resendVerificationMail = asyncHandler(async (req,res) => {
             throw new ApiError(400, "User is not found for the email")
         }
         op();
-        const token = jwt.sign(email, process.env.JWT_EMAIL_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ email }, process.env.JWT_EMAIL_SECRET, { expiresIn: "1h" });
         sendVerificationEmail(email,token)
         return res.status(200).json(new ApiResponse(200, {}, "Email Sent..."))
     }
