@@ -3,6 +3,7 @@ import { User } from "../model/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { changePasswordCounter, mongoOP, updateAccCounter } from "../metrics.js";
+import redis from "../utils/redisClient.js";
 
 const changePass = asyncHandler ( async (req, res) => {
     try {
@@ -15,6 +16,7 @@ const changePass = asyncHandler ( async (req, res) => {
         if (!req.body.user){
             throw new ApiError(400, "Unauth Request")
         }
+        console.log(req.body.user)
         const op = mongoOP.startTimer({operation: "find_logged_in_user", type: "findById"});
         const user = await User.findById(req.body.user?._id)
         op()
@@ -69,6 +71,10 @@ const updateAccount = asyncHandler( async (req, res) => {
             username: !!username,   
             fullname: !!fullname    
         })
+
+        await redis.del(`user:${updatedUser._id}:profile`)
+        await redis.set(`user:${updatedUser._id}:profile`, JSON.stringify(updatedUser), "EX", 3600);
+        
         return res.status(200).json(new ApiResponse(200, updatedUser, "Information Updated"))
     } catch (error) {
         throw new ApiError(400, error?.message)
