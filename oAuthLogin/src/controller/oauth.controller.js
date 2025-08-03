@@ -33,6 +33,7 @@ const tokens = asyncHandler( async (req, res) => {
     oauthTokenCreation.inc()
     const { accessToken, refreshToken } = tokenRes.data.data;
     user.refreshToken = refreshToken
+    user.isVerified = true
     const op = mongoOP.startTimer({operation: "save_refresh_token", type: "save"})
     await user.save({validateBeforeSave: false})
     op()

@@ -25,7 +25,14 @@ export function setProxies(app)  {
     userResDecorator: async (proxyRes, proxyResData, req, res) => {
         interceptResponse(proxyRes, req, res);
         return proxyResData;
-    }
-}));
+    }}));
 
+    app.use("/updateService", verifyJWT, proxy(process.env.UPDATE_WEB, {
+    proxyReqBodyDecorator: async (bodyContent, srcReq) => {
+    return {
+        ...(typeof bodyContent === 'object' && bodyContent !== null ? bodyContent : {}),
+        user: srcReq.user
+    };
+    }
+    }));
 }

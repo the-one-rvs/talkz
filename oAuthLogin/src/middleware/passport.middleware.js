@@ -33,7 +33,8 @@ passport.use(new GoogleStrategy({
                 email: profile.emails[0].value,
                 fullname: profile.displayName,
                 googleid: profile.id,
-                onlyOAuth: true
+                onlyOAuth: true,
+                isVerified: profile.email_verified 
             });
             op3()
         }
