@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { User } from "../model/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { mongoOP, oauthcallback, oauthduration } from "../metrics.js";
+import { getUniqueUsername } from "../utils/getUsername.js";
 
 
 
@@ -26,10 +27,12 @@ passport.use(new GoogleStrategy({
             }
         }
 
+        const username = getUniqueUsername(email);       
+
         if (!user) {
             const op3 = mongoOP.startTimer({operation: "creatting_user_with_DB_data", type: "create"})
             user = await User.create({
-                username: profile.emails[0].value.split("@")[0],
+                username: username,
                 email: profile.emails[0].value,
                 fullname: profile.displayName,
                 googleid: profile.id,

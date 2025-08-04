@@ -4,6 +4,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../model/user.model.js";
 import { oauthduration, oauthTokenCreation, mongoOP } from "../metrics.js";
 import axios from "axios";
+import { checkPass } from "../utils/validator.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const tokens = asyncHandler( async (req, res) => {
     const op2 = oauthduration.startTimer({OperationType: "Token Genration"})
@@ -52,6 +54,39 @@ const tokens = asyncHandler( async (req, res) => {
         loggedInUser
     },
      "Login successful from oAuth" ));
+})
+
+const addPassword = asyncHandler(async (req, res) => {
+    const {password} = req.body;
+    const userId = req.headers["x-user-id"];
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized");
+    }
+    if (!checkPass(password)){
+        throw new ApiError(400, "Password must have a size of 6 and must have 1 special character, 1 Capital Letter, 1 Number")
+    }
+
+    const op1 = mongoOP.startTimer({operation: "find_oAuth_user", type:"findByTd"})
+    const user = await User.findById(userId);
+    op1()
+    if (!user){
+        throw new ApiError(400, "User not found")
+    }
+
+    if (user.onlyOAuth==false){
+        throw new ApiError(400, "Sorry But Acount already have a password")
+    }
+
+    user.password = password; 
+    user.onlyOAuth = false;
+
+    const op = mongoOP.startTimer({ operation: "add_password", type: "save" });
+    await user.save();
+    op();
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "Password added successfully")
+    );
 })
 
 export {tokens}
