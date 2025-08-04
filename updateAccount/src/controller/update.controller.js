@@ -45,6 +45,8 @@ const changePass = asyncHandler ( async (req, res) => {
         user.password = newPassword
         await user.save({validateBeforeSave: false})
         op2()
+        await redis.del(`user:${user._id}:profile`)
+        await redis.del(`users:profile`)
         changePasswordCounter.inc()
         return res.status(200)
         .json(new ApiResponse(200,{},"Password Changed"))
@@ -89,6 +91,7 @@ const updateAccount = asyncHandler( async (req, res) => {
         })
 
         await redis.del(`user:${updatedUser._id}:profile`)
+        await redis.del(`users:profile`)
         await redis.set(`user:${updatedUser._id}:profile`, JSON.stringify(updatedUser), "EX", 3600);
         
         return res.status(200).json(new ApiResponse(200, updatedUser, "Information Updated"))

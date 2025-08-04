@@ -9,14 +9,18 @@ const logout = asyncHandler (async (req, res) => {
     if (!userId) {
         throw new ApiError(401, "Unauthorized");
     }
-
+    const op = mongoOP.startTimer({operation: "find_logged_in_user", type: "findById"});
     const user = await User.findById(userId);
+    op()
 
+    const op1 = mongoOP.startTimer({operation: "refreshToken_null", type: "save"})
     user.refreshToken = undefined
     await user.save({ validateBeforeSave: false });
+    op1()
 
     await redis.del(`user:${user._id}:profile`);
-    
+    logoutCounter.inc()
+
     return res
     .status(200)
     .json(new ApiResponse(200, {}, "User logged out successfully"))

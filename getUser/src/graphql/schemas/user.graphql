@@ -1,0 +1,13 @@
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  fullname: String!
+  onlyOAuth: Boolean!
+  isVerified: Boolean
+}
+
+type Query {
+  currentUser: User!
+  allUsers: [User!]!
+}

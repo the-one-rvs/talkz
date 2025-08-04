@@ -57,5 +57,12 @@ export function setProxies(app)  {
     proxyReqPathResolver: () => "/logout", 
     }));
 
+    app.use("/getUserService", verifyJWT, proxy(process.env.GET_USER_WEB, {
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+        const user = srcReq.user;
+        proxyReqOpts.headers['x-user-id'] = user._id;
+        return proxyReqOpts;
+    }
+    }));
 
 }
