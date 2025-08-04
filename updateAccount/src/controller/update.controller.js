@@ -14,7 +14,7 @@ const changePass = asyncHandler ( async (req, res) => {
             throw new ApiError(400, "Please Provide all feilds")
         }
 
-        if (checkPass(newPassword)){
+        if (!checkPass(newPassword)){
             throw new ApiError(
                 400,
                 "Password must be at least 6 characters long, include one capital letter, one number, and a letter and one special character."
