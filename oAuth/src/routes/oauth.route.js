@@ -1,5 +1,5 @@
 import Router from "express";
-import { tokens } from "../controller/oauth.controller.js";
+import { addPassword, tokens } from "../controller/oauth.controller.js";
 import passport from "passport";
 
 const router = Router()
@@ -12,5 +12,7 @@ router.get("/google", (req, res, next) => {
 
 router.get('/google/callback',
     passport.authenticate('google', { session: false }),tokens );
+
+router.route('/add-password').post(addPassword)
 
 export default router

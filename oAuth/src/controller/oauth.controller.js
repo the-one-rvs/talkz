@@ -89,4 +89,4 @@ const addPassword = asyncHandler(async (req, res) => {
     );
 })
 
-export {tokens}
+export {tokens, addPassword}

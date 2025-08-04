@@ -27,7 +27,7 @@ passport.use(new GoogleStrategy({
             }
         }
 
-        const username = getUniqueUsername(email);       
+        const username = getUniqueUsername(profile.emails[0].value);       
 
         if (!user) {
             const op3 = mongoOP.startTimer({operation: "creatting_user_with_DB_data", type: "create"})
