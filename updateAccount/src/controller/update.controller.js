@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { changePasswordCounter, mongoOP, updateAccCounter } from "../metrics.js";
 import redis from "../utils/redisClient.js";
+import { checkPass } from "../utils/validator.js";
 
 const changePass = asyncHandler ( async (req, res) => {
     try {
@@ -11,6 +12,13 @@ const changePass = asyncHandler ( async (req, res) => {
 
         if (!oldPassword && !newPassword){
             throw new ApiError(400, "Please Provide all feilds")
+        }
+
+        if (checkPass(newPassword)){
+            throw new ApiError(
+                400,
+                "Password must be at least 6 characters long, include one capital letter, one number, and a letter and one special character."
+            );
         }
 
         const userId = req.headers["x-user-id"];

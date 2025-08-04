@@ -6,6 +6,7 @@ import { mongoOP, registerDurationSeconds, registerSuccessCounter } from "../met
 import redis from "../utils/redisClient.js";
 import { sendVerificationEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
+import { checkEmail, checkPass } from "../utils/validator.js";
 
 const registerUser = asyncHandler(async (req,res) => {
     const {username, email, fullname, password} = req.body;
@@ -13,6 +14,19 @@ const registerUser = asyncHandler(async (req,res) => {
     if (!username && !email && !fullname && !password){
         throw new ApiError(400, "All fields are required !!!");
     }
+
+    if (!checkEmail(email)) {
+    throw new ApiError(400, "Email must contain @ and look valid.");
+    }
+
+    if (!checkPass(password)) {
+    throw new ApiError(
+        400,
+        "Password must be at least 6 characters long, include one capital letter, one number, and a letter and one special character."
+    );
+    }
+
+
     const op = mongoOP.startTimer({operation : "find_existing_user", type: "findOne"});
     const existingUser = await User.findOne({
         $or: [{ username }, { email }]
