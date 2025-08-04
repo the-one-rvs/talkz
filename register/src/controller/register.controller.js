@@ -29,8 +29,7 @@ const registerUser = asyncHandler(async (req,res) => {
         username: username,
         fullname: fullname,
         email: email,
-        password: password,
-        isVerified: false
+        password: password
     })
     op1()
     const op3 = mongoOP.startTimer({operation : "find_created_user", type: "findById"});

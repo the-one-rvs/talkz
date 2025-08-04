@@ -2,13 +2,16 @@ import redis from "../utils/redisClient.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { User } from "../model/user.model.js";
 
 const logout = asyncHandler (async (req, res) => {
-    const user = req.body.user
-    if (!user){
-        throw new ApiError(400, "Unauth Request");
+    const userId = req.headers["x-user-id"];
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized");
     }
-    console.log(user)
+
+    const user = await User.findById(userId);
+
     user.refreshToken = undefined
     await user.save({ validateBeforeSave: false });
 

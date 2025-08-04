@@ -3,6 +3,6 @@ import { logout } from "../controller/logout.controller.js"
 
 const router = Router()
 
-router.route("/logout").post(logout)
+router.route("/logout").get(logout)
 
 export default router

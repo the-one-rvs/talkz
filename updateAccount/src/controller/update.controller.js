@@ -13,13 +13,19 @@ const changePass = asyncHandler ( async (req, res) => {
             throw new ApiError(400, "Please Provide all feilds")
         }
 
-        if (!req.body.user){
+        const userId = req.headers["x-user-id"];
+        if (!userId) {
+            throw new ApiError(401, "Unauthorized");
+        }
+
+        const op = mongoOP.startTimer({operation: "find_logged_in_user", type: "findById"});
+        const user = await User.findById(userId)
+        op()
+
+        if (!user){
             throw new ApiError(400, "Unauth Request")
         }
-        console.log(req.body.user)
-        const op = mongoOP.startTimer({operation: "find_logged_in_user", type: "findById"});
-        const user = await User.findById(req.body.user?._id)
-        op()
+
         const op1 = mongoOP.startTimer({operation: "checkPassword", type: "Bcrypt_Compare"})
         const isPassCorrect = await user.isPasswordCorrect(oldPassword)
         op1()
@@ -52,16 +58,18 @@ const updateAccount = asyncHandler( async (req, res) => {
         if (Object.keys(updateFields).length === 0) {
             throw new ApiError(400, "No fields provided for update");
         }
-
-        if (!req.body.user){
-            throw new ApiError(400, "Unauth Request")
+        const userId = req.headers["x-user-id"];
+        if (!userId) {
+            throw new ApiError(401, "Unauthorized");
         }
 
+        const op = mongoOP.startTimer({operation: "update_new_info", type: "findByIdAndUpdate"})
         const updatedUser = await User.findByIdAndUpdate(
-            req.body.user?._id,
+            userId,
             updateFields,
             { new: true, runValidators: true }
         ).select("-password -refreshToken");
+        op()
 
         if (!updatedUser){
             throw new ApiError(400, "Something fishy !!!")
