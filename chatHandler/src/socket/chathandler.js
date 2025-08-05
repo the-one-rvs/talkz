@@ -1,3 +1,4 @@
+import { Message } from "../model/message.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
   addOnlineUser,
@@ -10,17 +11,45 @@ export const chatSocket = asyncHandler(async(socket, io) => {
 
   addOnlineUser(userId, socket.id);
 
-  await socket.on("send-message", ({ to, encryptedMessage, encryptedAESKey, iv }) => {
-    const receiverSocketId = getSocketIdByUserId(to);
-    if (receiverSocketId) {
-        io.to(receiverSocketId).emit("receive-message", {
-            from: socket.user._id,
-            encryptedMessage,
-            encryptedAESKey,
-            iv
-        });
-    }
+  const undeliveredMessages = await Message.find({
+    receiverId: userId,
+    delivered: false,
+  });
+
+  undeliveredMessages.forEach(async (msg) => {
+    socket.emit("receive-message", {
+      from: msg.senderId,
+      encryptedMessage: msg.encryptedMessage,
+      encryptedAESKey: msg.encryptedAESKey,
+      iv: msg.iv,
     });
+
+    // Mark message as delivered
+    msg.delivered = true;
+    await msg.save();
+  });
+  
+  socket.on("send-message", async ({ to, encryptedMessage, encryptedAESKey, iv }) => {
+    const receiverSocketId = getSocketIdByUserId(to);
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receive-message", {
+        from: socket.user._id,
+        encryptedMessage,
+        encryptedAESKey,
+        iv,
+      });
+    } else {
+      await Message.create({
+        senderId: socket.user._id,
+        receiverId: to,
+        encryptedMessage,
+        encryptedAESKey,
+        iv,
+        delivered: false,
+      });
+    }
+  });
 
 
   socket.on("disconnect", () => {
