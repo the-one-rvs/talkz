@@ -5,8 +5,9 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { schema } from "./graphql/index.js";
 import { prometheusMiddleware } from "./middleware/prom.middleware.js";
-import { register } from "./metrics.js";
+import { mongoOP, register } from "./metrics.js";
 import { User } from "./model/user.model.js";
+import redis  from "./utils/redisClient.js";
 // import { expressMiddleware } from "@apollo/server/express4";
 
 
@@ -32,7 +33,12 @@ app.use('/graphql', expressMiddleware(server, {
   context: async ({ req }) => {
     const userId = req.headers["x-user-id"];
     if (!userId) return { user: null };
+    const key = `user:${userId}:profile`;
+    const cached = await redis.get(key);
+    if (cached) return { user: JSON.parse(cached) };
+    const op = mongoOP.startTimer({operation: "find_logged_in_user", type: "findById"});
     const user = await User.findById(userId);
+    op()
     return { user: user || null };
   }
 }));

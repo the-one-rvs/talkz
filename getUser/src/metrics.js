@@ -19,7 +19,19 @@ export const httpRequestDurationHistogram = new client.Histogram({
 });
 register.registerMetric(httpRequestDurationHistogram);
 
+export const currentUserCounter = new client.Counter({
+  name: "talkz_getUserService_current_user_total",
+  help: "Counts the number of current user",
+  labelNames: ["user_id", "how"]
+})
+register.registerMetric(currentUserCounter)
 
+export const allUserCounter = new client.Counter({
+  name: "talkz_getUserService_all_user_total",
+  help: "Counts the number of all user",
+  labelNames: ["how"]
+})
+register.registerMetric(allUserCounter)
 
 export const mongoOP = new client.Histogram({
   name: "talkz_getUserService_mongodb_operations_seconds",
