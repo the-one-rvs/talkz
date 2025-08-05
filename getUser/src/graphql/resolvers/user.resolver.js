@@ -1,5 +1,5 @@
 import { User } from "../../model/user.model.js";
-import redisClient from "../../utils/redisClient.js";
+import redis from "../../utils/redisClient.js";
 import { ApiError } from "../../utils/ApiError.js";
 
 export const userResolvers = {
@@ -10,12 +10,12 @@ export const userResolvers = {
       }
 
       const key = `user:${user._id}:profile`;
-      const cached = await redisClient.get(key);
+      const cached = await redis.get(key);
 
       if (cached) return JSON.parse(cached);
 
       const currentUser = await User.findById(user._id).select("-password -refreshToken");
-      await redisClient.set(key, JSON.stringify(currentUser), { EX: 300 });
+      await redis.set(key, JSON.stringify(currentUser),  'EX', 300 );
 
       return currentUser;
     },
@@ -27,12 +27,12 @@ export const userResolvers = {
       }
 
       const key = `users:profile`;
-      const cached = await redisClient.get(key);
+      const cached = await redis.get(key);
 
       if (cached) return JSON.parse(cached);
       //should contain current user too..
       const users = await User.find().select("-password -refreshToken");
-      await redisClient.set(key, JSON.stringify(users), { EX: 120 });
+      await redis.set(key, JSON.stringify(users), 'EX', 120);
 
       return users;
     },

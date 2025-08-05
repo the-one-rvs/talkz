@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
 import { schema } from "./graphql/index.js";
 import { prometheusMiddleware } from "./middleware/prom.middleware.js";
-import { fetchUser } from "./middleware/fetchUser.middleware.js";
 import { register } from "./metrics.js";
+import { User } from "./model/user.model.js";
 // import { expressMiddleware } from "@apollo/server/express4";
 
 
@@ -21,18 +22,20 @@ app.use(cors({
 app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: true, limit: "20kb" }));
 app.use(cookieParser());
-
 const server = new ApolloServer({
-  schema,
-  context: ({ req, res }) => ({ req, res }),
+    schema
 });
 
 await server.start();
 
-app.use(
-  "/graphql",
-  fetchUser
-);
+app.use('/graphql', expressMiddleware(server, {
+  context: async ({ req }) => {
+    const userId = req.headers["x-user-id"];
+    if (!userId) return { user: null };
+    const user = await User.findById(userId);
+    return { user: user || null };
+  }
+}));
 
 app.get("/metrics", async (req, res) => {
   res.set("Content-Type", register.contentType);

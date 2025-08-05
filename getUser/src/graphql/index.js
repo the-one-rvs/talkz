@@ -1,17 +1,21 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+// import { fileURLToPath } from "url";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { userResolvers } from "./resolvers/user.resolver.js";
-
+import { loadFilesSync } from "@graphql-tools/load-files";
 // Needed for __dirname in ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+// import {User} from "../model/user.model.js"
 
-// Now resolve absolute path to user.graphql
-const typeDefs = readFileSync(path.join(__dirname, "schemas", "user.graphql"), "utf8");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const typesArray = loadFilesSync(path.join(__dirname, '**/*.graphql'));
+// const typesArray = loadFilesSync(path.join(__dirname, '**/*.graphql'));
+// const resolversArray = loadFilesSync(path.join(__dirname, '**/*.resolver.js'));
 
 export const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers: userResolvers,
+    typeDefs: typesArray,
+    resolvers: userResolvers
 });
