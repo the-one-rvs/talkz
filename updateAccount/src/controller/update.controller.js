@@ -34,11 +34,12 @@ const changePass = asyncHandler ( async (req, res) => {
             throw new ApiError(400, "Unauth Request")
         }
 
+        console.log(user)
         const op1 = mongoOP.startTimer({operation: "checkPassword", type: "Bcrypt_Compare"})
         const isPassCorrect = await user.isPasswordCorrect(oldPassword)
         op1()
         if (!isPassCorrect){
-            throw new ApiError(400, "Invalid Password")
+            throw new ApiError(400, "Invalid Password Please Try Again")
         }
 
         const op2 = mongoOP.startTimer({operation: "save_password", type:"save"})

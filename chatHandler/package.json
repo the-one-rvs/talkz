@@ -1,0 +1,29 @@
+{
+  "name": "chat-handler",
+  "version": "1.0.0",
+  "description": "Socket.IO chat service with AES-RSA end-to-end encryption",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "keywords": [
+    "socket.io",
+    "chat",
+    "aes",
+    "rsa",
+    "encryption",
+    "jwt",
+    "microservices"
+  ],
+  "author": "Vaibhav Sarswat"
+}

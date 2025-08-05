@@ -73,4 +73,12 @@ export function setProxies(app)  {
     }
     }));
 
+    app.use("/chatService", verifyJWT, proxy(process.env.CHAT_WEB, {
+    // proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+    //     const user = srcReq.user;
+    //     proxyReqOpts.headers['x-user-id'] = user._id;
+    //     return proxyReqOpts;
+    // }
+    }));
+
 }
