@@ -21,7 +21,7 @@ export const userResolvers = {
       const op = mongoOP.startTimer({operation: "get_current_user", type: "findById"});
       const currentUser = await User.findById(user._id).select("-password -refreshToken");
       op()
-      await redis.set(key, JSON.stringify(currentUser),  'EX', 300 );
+      await redis.set(key, JSON.stringify(currentUser),  'EX', 3600 );
       currentUserCounter.inc({user_id: user._id, how: "db"})
 
       return currentUser;
@@ -45,7 +45,7 @@ export const userResolvers = {
       const users = await User.find().select("-password -refreshToken");
       op1()
 
-      await redis.set(key, JSON.stringify(users), 'EX', 120);
+      await redis.set(key, JSON.stringify(users), 'EX', 3600);
       allUserCounter.inc({how: "db"})
       return users;
     },
