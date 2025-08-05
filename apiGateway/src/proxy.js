@@ -65,4 +65,12 @@ export function setProxies(app)  {
     }
     }));
 
+    app.use("/keyHandlerService", verifyJWT, proxy(process.env.KEY_HANDLER_WEB, {
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+        const user = srcReq.user;
+        proxyReqOpts.headers['x-user-id'] = user._id;
+        return proxyReqOpts;
+    }
+    }));
+
 }
