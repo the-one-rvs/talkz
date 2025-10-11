@@ -8,6 +8,7 @@ export const interceptResponse = (proxyRes, req, res) => {
     httpOnly: true,
     secure: true
   }
+  
 
   if (accessToken) {
     res.cookie("accessToken", accessToken, options);

@@ -24,6 +24,7 @@ app.get("/metrics", async (req, res) => {
 });
 
 // import { app } from "./app.js";
+
 setProxies(app)
 
 export { app }

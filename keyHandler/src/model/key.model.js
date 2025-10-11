@@ -1,12 +1,17 @@
 import mongoose,{ Schema } from "mongoose";
 
-const publicKeySchema = new Schema ({
+const keySchema = new Schema ({
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: true
+        required: true,
+        unique: true
     },
     publickey: {
+        type: String,
+        required: true
+    },
+    privatekey: {
         type: String,
         required: true
     }
@@ -14,5 +19,5 @@ const publicKeySchema = new Schema ({
     timestamps: true
 })
 
-export const PublicKey = mongoose.model("PublicKey", publicKeySchema)
+export const Key = mongoose.model("Key", keySchema)
 

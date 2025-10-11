@@ -25,7 +25,7 @@ const loginController = asyncHandler(async (req, res) => {
        //    console.log(`${user}`)
        op()
        if (user.onlyOAuth == true){
-        throw new ApiError(400, "User should register for login through password, He has only looged in using oAuth")
+        throw new ApiError(400, "User should register for login through password, He can only looged in using oAuth")
        }
        if (user.isVerified == false){
         throw new ApiError(400, "User Email not verified")
@@ -33,7 +33,7 @@ const loginController = asyncHandler(async (req, res) => {
        if (!user){
         throw new ApiError(400, "User not exsists")
        }
-       const isPassCorrect = user.isPasswordCorrect(password)
+       const isPassCorrect = await user.isPasswordCorrect(password)
        if (!isPassCorrect) {
         throw new ApiError(400, "Password not matches Try Again!")
        }

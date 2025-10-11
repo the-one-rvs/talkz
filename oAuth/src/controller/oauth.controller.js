@@ -46,19 +46,53 @@ const tokens = asyncHandler( async (req, res) => {
         throw new (400, "oAuth User not saved in DataBase")
     }
     op3()
+    const html = `<!doctype html>
+    <html>
+    <head><meta charset="utf-8"><title>Success</title></head>
+    <body>
+        <script>
+        try {
+            if (window.opener && !window.opener.closed) {
+            // Redirect parent and then close popup
+            window.opener.location.href = 'http://localhost:5173/chat';
+            window.close();
+            } else {
+            // If no opener, navigate in this window
+            window.location.href = 'http://localhost:5173/chat';
+            }
+        } catch (e) {
+            // window.location.href = 'http://localhost:5173/chat';
+            console.log(e)
+        }
+        </script>
+    </body>
+    </html>`;
+
+    if (!html){
+        throw new ApiError(400, "Redirect failed")
+    }
     res.setHeader("x-access-token", accessToken)
     res.setHeader("x-refresh-token", refreshToken)
-    return res.status(200)
-    .json(new ApiResponse( 200, 
-    {
-        loggedInUser
-    },
-     "Login successful from oAuth" ));
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      path: "/",
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      path: "/",
+    });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.send(html);
+    // return res.status(200).json(new ApiResponse(200, "Success", loggedInUser));
 })
 
 const addPassword = asyncHandler(async (req, res) => {
     const {password} = req.body;
-    const userId = req.headers["x-user-id"];
+    const userId = req.params.userId
     if (!userId) {
         throw new ApiError(401, "Unauthorized");
     }

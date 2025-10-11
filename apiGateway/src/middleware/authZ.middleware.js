@@ -6,6 +6,8 @@ import { mongoOP } from "../metrics.js";
 
 export const verifyJWT = asyncHandler(async(req, _, next) => {
     try {
+        // console.log("🧩 verifyJWT called for:", req.originalUrl);
+        // console.log("Cookies available:", req.cookies);
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
     
         if (!token) {
@@ -14,7 +16,7 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
     
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
         
-        console.log(decodedToken)
+        // console.log(decodedToken)
         const op = mongoOP.startTimer({operation: "find_user_from_token", type: "findById"})
         const user = await User.findById(decodedToken._id).select(" -password ")
         op()

@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { asyncHandler } from "./asyncHandler.js";
 
 export const sendVerificationEmail = asyncHandler(async (email, token) => {
-  const link = `http://localhost:5000/registerService/verify-email?token=${token}`;
+  const link = `http://localhost:5000/api/v1/registerService/verify-email?token=${token}`;
 
   const transporter = nodemailer.createTransport({
     service: "gmail",

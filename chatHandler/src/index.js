@@ -6,9 +6,16 @@ import http from "http";
 import { Server } from "socket.io";
 import { chatSocket } from "./socket/chathandler.js";
 import { authHandler } from "./middleware/auth.middleware.js";
-import { connectDB } from "./utils/db.js"; // assuming this exists
+import  connectDB  from "./db/connectDB.js"; // assuming this exists
+import onlineStatusRoutes from "./routes/onlineStatus.route.js";
+import messageRoutes from "./routes/message.route.js"
+
 
 const app = express();
+
+
+app.use("/api/online", onlineStatusRoutes);
+app.use("/", messageRoutes)
 
 connectDB().then(() => {
   const server = http.createServer(app);
@@ -25,6 +32,7 @@ connectDB().then(() => {
 
   //  Register Chat Socket Logic
   io.on("connection", (socket) => {
+    console.log("New connection:", socket.user?._id);
     chatSocket(socket, io);
   });
 

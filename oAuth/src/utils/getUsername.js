@@ -1,19 +1,21 @@
 import { User } from "../model/user.model.js";
 
-
 export const getUniqueUsername = async (email) => {
-  const base = email.split("@")[0].toLowerCase();
+  let base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, ""); // remove dots/special chars
   let username = base;
   let exists = await User.findOne({ username });
 
-  let counter = 1;
+  let attempts = 0;
 
-  while (exists) {
-    
-    username = `${base}${Math.floor(10000 + Math.random() * 90000)}`; 
+  while (exists && attempts < 10) {
+    username = `${base}${Math.floor(1000 + Math.random() * 9000)}`; // 4-digit random number
     exists = await User.findOne({ username });
+    attempts++;
+  }
 
-    if (counter++ > 100) break; 
+  // Fallback (just in case)
+  if (exists) {
+    username = `${base}${Date.now()}`;
   }
 
   return username;

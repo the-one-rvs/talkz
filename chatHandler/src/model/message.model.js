@@ -20,8 +20,8 @@ const messageSchema = new mongoose.Schema({
     required: true,
   },
   iv: {
-    type: String,
-    required: true,
+    type: [Number],
+    required: true
   },
   delivered: {
     type: Boolean,

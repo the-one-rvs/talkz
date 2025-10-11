@@ -12,7 +12,7 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: process.env.GOOGLE_CALLBACK_URL
-}, async (accessToken, refreshToken, profile, done) => {
+},async (accessToken, refreshToken, profile, done) => {
     try {
         const op2 = mongoOP.startTimer({operation: "find_user_by_google_id", type: "findOne"})
         let user = await User.findOne({ googleid: profile.id });
@@ -27,7 +27,7 @@ passport.use(new GoogleStrategy({
             }
         }
 
-        const username = getUniqueUsername(profile.emails[0].value);       
+        const username = await getUniqueUsername(profile.emails[0].value);       
 
         if (!user) {
             const op3 = mongoOP.startTimer({operation: "creatting_user_with_DB_data", type: "create"})

@@ -3,6 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../model/user.model.js";
+import { mongoOP } from "../metrics.js";
+import { logoutSuccessCounter } from "../metrics.js";
 
 const logout = asyncHandler (async (req, res) => {
     const userId = req.headers["x-user-id"];
@@ -19,7 +21,18 @@ const logout = asyncHandler (async (req, res) => {
     op1()
 
     await redis.del(`user:${user._id}:profile`);
-    logoutCounter.inc()
+    logoutSuccessCounter.inc()
+
+
+    res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true
+    });
+
+    res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true
+    }); 
 
     return res
     .status(200)
