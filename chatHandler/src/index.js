@@ -9,7 +9,9 @@ import { authHandler } from "./middleware/auth.middleware.js";
 import  connectDB  from "./db/connectDB.js"; // assuming this exists
 import onlineStatusRoutes from "./routes/onlineStatus.route.js";
 import messageRoutes from "./routes/message.route.js"
+import { connectRabbitMQ } from "./queues/publisher.js";
 
+await connectRabbitMQ()
 
 const app = express();
 

@@ -7,11 +7,16 @@ import { app } from "./app.js";
 // import { DB_NAME } from "./constants.js";
 import connectDB from "./db/connectDB.js";
 
+import { connectRabbitMQ } from "./queues/publisher.js";
+
+await connectRabbitMQ()
+
 connectDB()
 .then(() => {
     app.listen(process.env.PORT || 8000, () => {
         console.log(`Server running at port: ${process.env.PORT}`);
     })
+    
 })
 .catch((error) => {
     console.log("Error in DB Connection: ", error)

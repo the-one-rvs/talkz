@@ -4,9 +4,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { mongoOP, registerDurationSeconds, registerSuccessCounter } from "../metrics.js";
 import redis from "../utils/redisClient.js";
-import { sendVerificationEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
 import { checkEmail, checkPass } from "../utils/validator.js";
+import { publishEmailEvent } from "../queues/publisher.js";  
+
 
 const registerUser = asyncHandler(async (req,res) => {
     const {username, email, fullname, password} = req.body;
@@ -37,7 +38,15 @@ const registerUser = asyncHandler(async (req,res) => {
         throw new ApiError(400, "User Already Exsist !!!")
     }
     const token = jwt.sign({ email }, process.env.JWT_EMAIL_SECRET, { expiresIn: "1h" });
-    sendVerificationEmail(email, token)
+
+
+    await publishEmailEvent({
+        type: "EMAIL_VERIFICATION",
+        to: email,
+        token: token
+    });
+
+
     const op1 = mongoOP.startTimer({operation : "creating_user", type: "create"})
     const user = await User.create({
         username: username,
@@ -92,7 +101,11 @@ const resendVerificationMail = asyncHandler(async (req,res) => {
         }
         op();
         const token = jwt.sign({ email }, process.env.JWT_EMAIL_SECRET, { expiresIn: "1h" });
-        sendVerificationEmail(email,token)
+        await publishEmailEvent({
+            type: "EMAIL_VERIFICATION",
+            to: email,
+            token: token
+        });
         return res.status(200).json(new ApiResponse(200, {}, "Email Sent..."))
     }
     catch(error){

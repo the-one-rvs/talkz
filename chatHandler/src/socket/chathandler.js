@@ -5,6 +5,10 @@ import {
   removeOnlineUser,
   getSocketIdByUserId
 } from "../utils/onlineUser.js";
+import { publishEmailEvent } from "../queues/publisher.js";
+import "dotenv/config";
+import { User } from "../model/user.model.js";
+
 
 export const chatSocket = asyncHandler(async (socket, io) => {
   const userId = socket.user._id;
@@ -50,7 +54,7 @@ export const chatSocket = asyncHandler(async (socket, io) => {
         encryptedAESKey,
         iv,
         delivered: false,
-        createdAt: createdAt || new Date(), // 👈 sync timestamp if frontend sends one
+        createdAt: createdAt || new Date(), 
       });
 
       console.log(`💾 Message stored in DB: ${messageDoc._id}`);
@@ -71,6 +75,22 @@ export const chatSocket = asyncHandler(async (socket, io) => {
         messageDoc.delivered = true;
         await messageDoc.save();
       } else {
+        // Send Mail
+
+        const receiver = await User.findById(to);
+        if (!receiver || !receiver.email) {
+          console.warn(`❌ Receiver email not found for userId ${to}`);
+          return;
+        }
+
+
+        await publishEmailEvent({
+          type: "OFFLINE_MESSAGE",
+          to: receiver.email,      
+          from: socket.user.username || "Someone", // sender name
+          message: "You have a new message waiting in TalkZ!" // optional snippet
+        });
+
         console.log(`📦 Receiver ${to} offline — stored for later`);
       }
     } catch (err) {

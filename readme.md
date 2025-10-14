@@ -1,4 +1,4 @@
-# TalkZ — Microservices Monorepo
+# TalkZ — Microservices Based Secure Talking App
 
 This repository contains the TalkZ microservices stack (local and infra notes, run instructions, and an ops blueprint). This README explains how to run the services locally, how OAuth cookie handling is implemented (direct & gateway approaches), and the planned production architecture (EKS + Helm + GitOps + security + observability + IaC). It also documents each microservice and points to the main files to inspect.
 
