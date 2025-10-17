@@ -1,0 +1,93 @@
+variables:
+  SERVICE_NAME: "logout"
+  IMAGE_NAME: "$DOCKERHUB_USER/talkz-$SERVICE_NAME"
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+default:
+  image: docker:24.0.5
+  services:
+    - name: docker:dind
+      alias: docker
+  before_script:
+    - apk add --no-cache git bash curl jq
+
+stages:
+  - version
+  - depscan
+  - build
+  - image-scan
+  - push
+
+# 1️⃣ Compute Version
+compute_version:
+  stage: version
+  script:
+    - BASE_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0")
+    - MAJOR=$(echo $BASE_TAG | grep -oE '^[0-9]+' || echo "0")
+    - LAST=$(git tag --sort=-creatordate | grep "^$MAJOR" | tail -n1 || echo "$MAJOR.0.0")
+    - IFS='.' read -r MA MI PA <<< "$LAST"
+    - PA=$((PA+1))
+    - if [ "$PA" -ge 50 ]; then PA=0; MI=$((MI+1)); fi
+    - NEW_TAG="$MA.$MI.$PA"
+    - echo "NEW_TAG=$NEW_TAG" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+# 2️⃣ OWASP Dependency Check
+dependency_check:
+  stage: depscan
+  needs: [compute_version]
+  image:
+    name: owasp/dependency-check:latest
+    entrypoint: [""]
+  script:
+    - source build.env
+    - mkdir -p reports
+    - dependency-check.sh --project "$SERVICE_NAME" --scan . --format "JSON" --out reports/ --disableAssembly --enableExperimental
+  artifacts:
+    when: always
+    paths:
+      - reports/
+    expire_in: 7 days
+  allow_failure: true
+
+# 3️⃣ Docker Build
+build_image:
+  stage: build
+  needs: [compute_version, dependency_check]
+  script: |
+    source build.env
+    echo "🐳 Building Docker image: $IMAGE_NAME:$NEW_TAG"
+    docker build -t $IMAGE_NAME:$NEW_TAG .
+  artifacts:
+    paths:
+      - build.env
+
+# 4️⃣ Trivy Image Scan
+image_vulnerability_scan:
+  stage: image-scan
+  needs: [build_image]
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - source build.env
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy-report.json $IMAGE_NAME:$NEW_TAG
+  artifacts:
+    paths:
+      - trivy-report.json
+    expire_in: 7 days
+  allow_failure: true
+
+# 5️⃣ Push Docker Image
+push_image:
+  stage: push
+  needs: [build_image, image_vulnerability_scan]
+  script:
+    - source build.env
+    - echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+    - docker push $IMAGE_NAME:$NEW_TAG
+  rules:
+    - if: '$DOCKERHUB_USER && $DOCKERHUB_PASS'
