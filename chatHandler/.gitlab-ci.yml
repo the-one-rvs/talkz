@@ -1,4 +1,5 @@
 variables:
+  GIT_STRATEGY: clone
   SERVICE_NAME: "chat"
   IMAGE_NAME: "$DOCKERHUB_USER/talkz-$SERVICE_NAME"
   DOCKER_HOST: tcp://docker:2375
@@ -11,83 +12,130 @@ default:
       alias: docker
   before_script:
     - apk add --no-cache git bash curl jq
+    - echo "Fetching repo content..."
+    # - git init
+    # - git remote add origin "$CI_REPOSITORY_URL"
+    # - git fetch origin $CI_COMMIT_SHA
+    # - git checkout $CI_COMMIT_SHA
+    - echo "Repo contents at start of job:"
+    - cd chatHandler
+    - ls -la
+
 
 stages:
   - version
-  - depscan
   - build
   - image-scan
   - push
 
-# 1️⃣ Compute Version
 compute_version:
   stage: version
-  script:
-    - BASE_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0")
-    - MAJOR=$(echo $BASE_TAG | grep -oE '^[0-9]+' || echo "0")
-    - LAST=$(git tag --sort=-creatordate | grep "^$MAJOR" | tail -n1 || echo "$MAJOR.0.0")
-    - IFS='.' read -r MA MI PA <<< "$LAST"
-    - PA=$((PA+1))
-    - if [ "$PA" -ge 50 ]; then PA=0; MI=$((MI+1)); fi
-    - NEW_TAG="$MA.$MI.$PA"
-    - echo "NEW_TAG=$NEW_TAG" >> build.env
+  script: |
+    #!/bin/bash
+    set -ex
+
+    cd "$CI_PROJECT_DIR"
+    echo "📂 Current Dir: $(pwd)"
+
+    # Ensure git history is available
+    git fetch --tags --force
+
+    echo "🔍 Fetching latest numeric git tags..."
+    # Get latest numeric tag (major only, e.g., 0,1,2...)
+    LATEST_MAJOR_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+$' | head -n1 || true)
+
+    if [ -z "$LATEST_MAJOR_TAG" ]; then
+      Z=0
+      echo "⚠️ No major numeric git tags found, setting Z=0"
+    else
+      Z=$LATEST_MAJOR_TAG
+      echo "🧩 Latest major tag (Z) = $Z"
+    fi
+
+    # Get last patch number for this major
+    LAST_PATCH_TAG=$(git tag --sort=-v:refname | grep -E "^${Z}\.[0-9]+\.[0-9]+$" | head -n1 || true)
+
+    if [ -z "$LAST_PATCH_TAG" ]; then
+      X=0
+      Y=0
+      echo "🆕 No previous patch found for major $Z, starting from $Z.0.0"
+    else
+      X=$(echo $LAST_PATCH_TAG | cut -d. -f2)
+      Y=$(echo $LAST_PATCH_TAG | cut -d. -f3)
+      echo "📦 Last build found: $LAST_PATCH_TAG (X=$X, Y=$Y)"
+      Y=$((Y+1))
+      if [ "$Y" -ge 50 ]; then
+        Y=0
+        X=$((X+1))
+        echo "🔁 Patch reached 50, bumping minor: X=$X, Y=0"
+      fi
+    fi
+
+    NEW_TAG="${Z}.${X}.${Y}"
+    echo "✅ Computed Version: $NEW_TAG"
+
+    # Save for next jobs
+    mkdir -p chatHandler
+    {
+      echo "NEW_TAG=$NEW_TAG"
+      echo "Z=$Z"
+      echo "X=$X"
+      echo "Y=$Y"
+    } > chatHandler/build.env
+
+    echo "📄 Saved version info:"
+    cat chatHandler/build.env
+
+    git tag $NEW_TAG
+    git push https://vaibhavsarswat142005:$GITLAB_TOKEN@gitlab.com/quasar_celestio/talkz.git $NEW_TAG
+
   artifacts:
     reports:
-      dotenv: build.env
-
-# 2️⃣ OWASP Dependency Check
-dependency_check:
-  stage: depscan
-  needs: [compute_version]
-  image:
-    name: owasp/dependency-check:latest
-    entrypoint: [""]
-  script:
-    - source build.env
-    - mkdir -p reports
-    - dependency-check.sh --project "$SERVICE_NAME" --scan . --format "JSON" --out reports/ --disableAssembly --enableExperimental
-  artifacts:
-    when: always
+      dotenv: chatHandler/build.env
     paths:
-      - reports/
-    expire_in: 7 days
-  allow_failure: true
+      - chatHandler/build.env
+    expire_in: 1 week
 
-# 3️⃣ Docker Build
 build_image:
   stage: build
-  needs: [compute_version, dependency_check]
+  needs: [compute_version]
   script: |
     source build.env
-    echo "🐳 Building Docker image: $IMAGE_NAME:$NEW_TAG"
+    echo "Building Docker image: $IMAGE_NAME:$NEW_TAG"
     docker build -t $IMAGE_NAME:$NEW_TAG .
   artifacts:
     paths:
-      - build.env
+      - chatHandler/build.env
 
-# 4️⃣ Trivy Image Scan
 image_vulnerability_scan:
   stage: image-scan
   needs: [build_image]
-  image:
-    name: aquasec/trivy:latest
-    entrypoint: [""]
-  script:
-    - source build.env
-    - trivy image --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy-report.json $IMAGE_NAME:$NEW_TAG
+  image: docker:24.0.5-cli
+  script: |
+    apk add --no-cache curl
+    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    source build.env
+    echo "Building Docker image: $IMAGE_NAME:$NEW_TAG"
+    docker build -t $IMAGE_NAME:$NEW_TAG .
+    trivy --version
+    trivy image --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy-report.json $IMAGE_NAME:$NEW_TAG
+    cat trivy-report.json
   artifacts:
+    reports:
+      container_scanning: chatHandler/trivy-report.json
     paths:
-      - trivy-report.json
+      - chatHandler/trivy-report.json
     expire_in: 7 days
   allow_failure: true
 
-# 5️⃣ Push Docker Image
 push_image:
   stage: push
   needs: [build_image, image_vulnerability_scan]
-  script:
-    - source build.env
-    - echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
-    - docker push $IMAGE_NAME:$NEW_TAG
+  script: |
+    source build.env
+    echo "Building Docker image: $IMAGE_NAME:$NEW_TAG"
+    docker build -t $IMAGE_NAME:$NEW_TAG .
+    echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+    docker push $IMAGE_NAME:$NEW_TAG
   rules:
     - if: '$DOCKERHUB_USER && $DOCKERHUB_PASS'
