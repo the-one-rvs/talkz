@@ -41,28 +41,31 @@ compute_version:
     # Ensure git history is available
     git fetch --tags --force
 
-    echo "🔍 Fetching latest numeric git tags..."
-    # Get latest numeric tag (major only, e.g., 0,1,2...)
-    LATEST_MAJOR_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+$' | head -n1 || true)
+    echo "🔍 Fetching latest numeric git tags for $SERVICE_NAME..."
+    # Get latest major tag for this service only
+    LATEST_MAJOR_TAG=$(git tag --sort=-v:refname | grep -E "^${SERVICE_NAME}-[0-9]+$" | head -n1 || true)
 
     if [ -z "$LATEST_MAJOR_TAG" ]; then
       Z=0
-      echo "⚠️ No major numeric git tags found, setting Z=0"
+      echo "⚠️ No major numeric git tags found for $SERVICE_NAME, setting Z=0"
     else
-      Z=$LATEST_MAJOR_TAG
-      echo "🧩 Latest major tag (Z) = $Z"
+      # Strip service name prefix
+      Z=$(echo "$LATEST_MAJOR_TAG" | sed "s/^$SERVICE_NAME-//")
+      echo "🧩 Latest major tag for $SERVICE_NAME (Z) = $Z"
     fi
 
-    # Get last patch number for this major
-    LAST_PATCH_TAG=$(git tag --sort=-v:refname | grep -E "^${Z}\.[0-9]+\.[0-9]+$" | head -n1 || true)
+    # Get last patch number for this major for this service
+    LAST_PATCH_TAG=$(git tag --sort=-v:refname | grep -E "^${SERVICE_NAME}-${Z}\.[0-9]+\.[0-9]+$" | head -n1 || true)
 
     if [ -z "$LAST_PATCH_TAG" ]; then
       X=0
       Y=0
-      echo "🆕 No previous patch found for major $Z, starting from $Z.0.0"
+      echo "🆕 No previous patch found for $SERVICE_NAME major $Z, starting from ${Z}.0.0"
     else
-      X=$(echo $LAST_PATCH_TAG | cut -d. -f2)
-      Y=$(echo $LAST_PATCH_TAG | cut -d. -f3)
+      # Strip service name prefix and split
+      VERSION_PART=$(echo "$LAST_PATCH_TAG" | sed "s/^$SERVICE_NAME-//")
+      X=$(echo $VERSION_PART | cut -d. -f2)
+      Y=$(echo $VERSION_PART | cut -d. -f3)
       echo "📦 Last build found: $LAST_PATCH_TAG (X=$X, Y=$Y)"
       Y=$((Y+1))
       if [ "$Y" -ge 50 ]; then
@@ -72,13 +75,15 @@ compute_version:
       fi
     fi
 
-    NEW_TAG="${Z}.${X}.${Y}"
+    NEW_TAG="${SERVICE_NAME}-${Z}.${X}.${Y}"
+    USE_TAG="${Z}.${X}.${Y}"
+    echo "Used tag for image: $USE_TAG"
     echo "✅ Computed Version: $NEW_TAG"
 
     # Save for next jobs
     mkdir -p $DIR
     {
-      echo "NEW_TAG=$NEW_TAG"
+      echo "NEW_TAG=$USE_TAG"
       echo "Z=$Z"
       echo "X=$X"
       echo "Y=$Y"
