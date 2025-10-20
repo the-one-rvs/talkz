@@ -6,129 +6,145 @@ variables:
   DOCKERHUB_USER: $DOCKERHUB_USER
   DOCKERHUB_PASS: $DOCKERHUB_PASS
 
-# API GATEWAY SERVICE
 trigger_apiGateway:
   stage: trigger
   trigger:
     include: 'apiGateway/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "apiGateway/**/*"
 
-# CHAT HANDLER SERVICE
+
 trigger_chat:
   stage: trigger
   trigger:
     include: 'chatHandler/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "chatHandler/**/*"
 
-# TOKEN SERVICE
+
 trigger_token:
   stage: trigger
   trigger:
     include: 'generateToken/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "generateToken/**/*"
 
-# FRONTEND
+
 trigger_frontend:
   stage: trigger
   trigger:
     include: 'frontend/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "frontend/**/*"
 
 
-# GET USER SERVICE
 trigger_getuser:
   stage: trigger
   trigger:
     include: 'getUser/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "getUser/**/*"
 
 
-# KEY HANDLER SERVICE
 trigger_keyhandler:
   stage: trigger
   trigger:
     include: 'keyHandler/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "keyHandler/**/*"
 
 
-# LOGOUT SERVICE
 trigger_logout:
   stage: trigger
   trigger:
     include: 'logout/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "logout/**/*"
 
 
-# UPDATE ACCOUNT SERVICE
 trigger_updateaccount:
   stage: trigger
   trigger:
     include: 'updateAccount/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "updateAccount/**/*"
 
 
-# OAUTH SERVICE
 trigger_oauth:
   stage: trigger
   trigger:
     include: 'oAuth/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "oAuth/**/*"
 
 
-# LOGIN SERVICE
 trigger_login:
   stage: trigger
   trigger:
     include: 'login/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "login/**/*"
 
 
-# REGISTER SERVICE
 trigger_register:
   stage: trigger
   trigger:
     include: 'register/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "register/**/*"
 
-# MAIL SERVICE
+
 trigger_mail:
   stage: trigger
   trigger:
     include: 'mail/.gitlab-ci.yml'
     strategy: depend
   rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
     - changes:
         - "mail/**/*"
