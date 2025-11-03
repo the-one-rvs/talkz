@@ -1,0 +1,6 @@
+apiVersion: v2
+name: talkz-mail
+description: Helm chart for Talkz mail application
+type: application
+version: 0.1.0
+appVersion: "0.0.0"

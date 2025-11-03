@@ -1,0 +1,6 @@
+apiVersion: v2
+name: talkz-login
+description: Helm chart for Talkz login application
+type: application
+version: 0.1.0
+appVersion: "0.0.0"

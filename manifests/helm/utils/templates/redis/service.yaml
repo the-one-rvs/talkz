@@ -1,0 +1,11 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: {{ .Values.redis.port }}
+{{- end }}

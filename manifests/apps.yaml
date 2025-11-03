@@ -1,0 +1,314 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-gateway
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/gateway
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: login-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/login
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: generate-token
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/token
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oauth-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/oauth
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: register-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/register
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: getuser-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/getuser
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keyhandler-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/key
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chathandler-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/chat
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logout-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/logout
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: update-account
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/update
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mail-service
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/mail
+    helm: {}
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/frontend
+    helm:
+      parameters: []
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: utils
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talkz
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/the-one-rvs/talkz.git"
+    targetRevision: main
+    path: manifests/helm/utils
+    helm:
+      parameters: []
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: talkz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

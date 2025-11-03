@@ -1,0 +1,16 @@
+mongodb:
+  enabled: true
+  image: mongo:6
+  storage: 5Gi
+  port: 27017
+
+redis:
+  enabled: true
+  image: redis:7
+  port: 6379
+
+rabbitmq:
+  enabled: true
+  image: rabbitmq:3-management
+  port: 5672
+  dashboardPort: 15672

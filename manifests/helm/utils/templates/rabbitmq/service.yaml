@@ -1,0 +1,16 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      port: {{ .Values.rabbitmq.port }}
+      targetPort: {{ .Values.rabbitmq.port }}
+    - name: dashboard
+      port: {{ .Values.rabbitmq.dashboardPort }}
+      targetPort: {{ .Values.rabbitmq.dashboardPort }}
+{{- end }}

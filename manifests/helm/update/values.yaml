@@ -1,0 +1,46 @@
+replicaCount: 2
+
+deployment-name: talkz-update-deployment
+svc-name: talkz-update-svc
+
+image:
+  repository: quasarcelestio/talkz-update
+  tag: "0.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+# Reference secret created from talkz-secrets chart
+envSecretName: talkz-update-secret
+
+# ingress:
+#   enabled: true
+#   className: nginx
+#   annotations: {}
+#   hosts:
+#     - host: talkz.example.com
+#       paths:
+#         - path: /
+#           pathType: Prefix
+#   tls: []
+#   # Example:
+#   # tls:
+#   #   - secretName: talkz-frontend-tls
+#   #     hosts:
+#   #       - talkz.example.com
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+probes:
+  path: /
+  port: 80
+
