@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-mail-deployment
-svc-name: talkz-mail-svc
+deploymentName: talkz-mail-deployment
+svcName: talkz-mail-svc
 
 image:
   repository: quasarcelestio/talkz-mail

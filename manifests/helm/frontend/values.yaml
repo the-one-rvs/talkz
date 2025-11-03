@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-frontend-deployment
-svc-name: talkz-frontend-svc
+deploymentName: talkz-frontend-deployment
+svcName: talkz-frontend-svc
 
 image:
   repository: quasarcelestio/talkz-frontend

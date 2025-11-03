@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-key-deployment
-svc-name: talkz-key-svc
+deploymentName: talkz-key-deployment
+svcName: talkz-key-svc
 
 image:
   repository: quasarcelestio/talkz-key

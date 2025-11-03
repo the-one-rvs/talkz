@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-token-deployment
-svc-name: talkz-token-svc
+deploymentName: talkz-token-deployment
+svcName: talkz-token-svc
 
 image:
   repository: quasarcelestio/talkz-token

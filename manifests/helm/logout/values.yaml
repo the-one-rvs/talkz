@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-logout-deployment
-svc-name: talkz-logout-svc
+deploymentName: talkz-logout-deployment
+svcName: talkz-logout-svc
 
 image:
   repository: quasarcelestio/talkz-logout

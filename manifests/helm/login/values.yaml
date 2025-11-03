@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-login-deployment
-svc-name: talkz-login-svc
+deploymentName: talkz-login-deployment
+svcName: talkz-login-svc
 
 image:
   repository: quasarcelestio/talkz-login

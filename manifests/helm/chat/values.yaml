@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-chat-deployment
-svc-name: talkz-chat-svc
+deploymentName: talkz-chat-deployment
+svcName: talkz-chat-svc
 
 image:
   repository: quasarcelestio/talkz-chat

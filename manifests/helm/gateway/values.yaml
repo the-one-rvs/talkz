@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-gateway-deployment
-svc-name: talkz-gateway-svc
+deploymentName: talkz-gateway-deployment
+svcName: talkz-gateway-svc
 
 image:
   repository: quasarcelestio/talkz-gateway

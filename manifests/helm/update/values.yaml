@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-update-deployment
-svc-name: talkz-update-svc
+deploymentName: talkz-update-deployment
+svcName: talkz-update-svc
 
 image:
   repository: quasarcelestio/talkz-update

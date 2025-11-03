@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-getuser-deployment
-svc-name: talkz-getuser-svc
+deploymentName: talkz-getuser-deployment
+svcName: talkz-getuser-svc
 
 image:
   repository: quasarcelestio/talkz-getuser
