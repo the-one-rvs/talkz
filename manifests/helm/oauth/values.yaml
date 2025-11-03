@@ -1,7 +1,7 @@
 replicaCount: 2
 
-deployment-name: talkz-oauth-deployment
-svc-name: talkz-oauth-svc
+deploymentName: talkz-oauth-deployment
+svcName: talkz-oauth-svc
 
 image:
   repository: quasarcelestio/talkz-oauth
