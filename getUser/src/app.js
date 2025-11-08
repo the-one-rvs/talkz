@@ -48,4 +48,4 @@ app.get("/metrics", async (req, res) => {
   res.end(await register.metrics());
 });
 
-export { app };
+export default app;
