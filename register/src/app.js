@@ -19,4 +19,4 @@ app.get("/metrics",  async (req, res) => {
 import registerRouter from './routes/register.route.js'
 app.use("/",registerRouter)
 
-export { app }
+export default app
