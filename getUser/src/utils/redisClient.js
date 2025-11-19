@@ -10,7 +10,7 @@ const redis = new Redis({
   port: process.env.REDIS_PORT,      // e.g. 17199
   username: "default",
   password: process.env.REDIS_PASSWORD, 
-  tls: {} // Redis Cloud requires TLS
+  // tls: {} // Redis Cloud requires TLS
 });
 
 
