@@ -7,7 +7,7 @@ variables:
   DIR: logout
 
 default:
-  image: docker:24.0.5
+  image: docker:27.0.3
   services:
     - name: docker:dind
       alias: docker
@@ -43,8 +43,12 @@ compute_version:
 
     echo "🔍 Fetching latest numeric git tags for $SERVICE_NAME..."
     # Get latest major tag for this service only
-    LATEST_MAJOR_TAG=$(git tag --sort=-v:refname | grep -E "^${SERVICE_NAME}-[0-9]+$" | head -n1 || true)
-
+    LATEST_MAJOR_TAG=$(git tag --sort=-v:refname \
+    | grep -E "^${SERVICE_NAME}-[0-9]+\.[0-9]+\.[0-9]+$" \
+    | sed "s/^$SERVICE_NAME-//" \
+    | cut -d. -f1 \
+    | sort -nr \
+    | head -n1 || echo 0)
     if [ -z "$LATEST_MAJOR_TAG" ]; then
       Z=0
       echo "⚠️ No major numeric git tags found for $SERVICE_NAME, setting Z=0"
@@ -116,7 +120,7 @@ build_image:
 image_vulnerability_scan:
   stage: image-scan
   needs: [build_image]
-  image: docker:24.0.5-cli
+  image: docker:27.0.3-cli
   script: |
     apk add --no-cache curl
     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
