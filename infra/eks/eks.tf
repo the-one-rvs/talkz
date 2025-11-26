@@ -7,6 +7,27 @@ module "eks" {
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
+  // Enable public access to the cluster endpoint
+  cluster_endpoint_public_access  = true
+  cluster_endpoint_private_access = true
+
+  // Allow your IP to access the cluster (restrict in production)
+  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
+
+
+  access_entries = {
+    account_root = {
+      principal_arn = "arn:aws:iam::882816897152:root"
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
 
   eks_managed_node_groups = {
     default = {
@@ -16,6 +37,13 @@ module "eks" {
 
       instance_types = [var.instance_type]
       capacity_type  = "ON_DEMAND"
+
+      iam_role_additional_policies = {
+        AmazonEKSWorkerNodePolicy          = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        AmazonEKS_CNI_Policy               = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+        AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        AmazonSSMManagedInstanceCore       = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      }
 
       tags = {
         Environment = "dev"

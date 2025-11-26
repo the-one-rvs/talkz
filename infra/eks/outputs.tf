@@ -20,9 +20,8 @@ output "cluster_version" {
 
 output "configure_kubectl" {
   description = "Configure kubectl: run update-kubeconfig within the same directory"
-  value       = "aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks.cluster_id}"
+  value       = "aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks.cluster_name}"
 }
-
 output "vpc_id" {
   description = "VPC ID"
   value       = module.vpc.vpc_id
@@ -36,4 +35,14 @@ output "private_subnet_ids" {
 output "public_subnet_ids" {
   description = "Public subnet IDs"
   value       = module.vpc.public_subnets
+}
+
+resource "local_file" "kubeconfig_command" {
+  filename = "${path.module}/../../playbooks/kubeconfig_command.sh"
+  content  = "#!/bin/bash\n${local.configure_kubectl_cmd}\n"
+  file_permission = "0755"
+}
+
+locals {
+  configure_kubectl_cmd = "aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks.cluster_name}"
 }
