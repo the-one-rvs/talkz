@@ -25,15 +25,15 @@ spec:
                 name: {{ .Values.envSecretName }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.probes.path }}
-              port: {{ .Values.probes.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.probes.path }}
-              port: {{ .Values.probes.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
+          # livenessProbe:
+          #   httpGet:
+          #     path: {{ .Values.probes.path }}
+          #     port: {{ .Values.probes.port }}
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: {{ .Values.probes.path }}
+          #     port: {{ .Values.probes.port }}
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
