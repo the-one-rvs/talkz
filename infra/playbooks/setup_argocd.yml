@@ -1,0 +1,80 @@
+---
+- name: Setup ArgoCD on EKS
+  hosts: localhost
+  gather_facts: false
+  vars:
+    kubeconfig_script: "{{ playbook_dir }}/kubeconfig_command.sh"
+    argocd_namespace: argocd
+    argocd_manifest_url: "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+  
+  tasks:
+    - name: Check if kubeconfig_command.sh exists
+      stat:
+        path: "{{ kubeconfig_script }}"
+      register: kubeconfig_file
+      
+    - name: Fail if kubeconfig script not found
+      fail:
+        msg: "kubeconfig_command.sh not found in {{ playbook_dir }}. Please run terraform to generate it first."
+      when: not kubeconfig_file.stat.exists
+      
+    - name: Make kubeconfig script executable
+      file:
+        path: "{{ kubeconfig_script }}"
+        mode: '0755'
+        
+    - name: Configure kubectl access
+      command: "{{ kubeconfig_script }}"
+      register: kubectl_config
+      changed_when: true
+      
+    - name: Display kubectl configuration result
+      debug:
+        msg: "{{ kubectl_config.stdout }}"
+        
+    - name: Create ArgoCD namespace
+      kubernetes.core.k8s:
+        name: "{{ argocd_namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+        
+    - name: Install ArgoCD
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ argocd_manifest_url }}"
+        namespace: "{{ argocd_namespace }}"
+        
+    - name: Wait for ArgoCD server deployment to be available
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        name: argocd-server
+        namespace: "{{ argocd_namespace }}"
+      register: argocd_deployment
+      until: argocd_deployment.resources[0].status.availableReplicas | default(0) > 0
+      retries: 30
+      delay: 10
+      
+    - name: Patch ArgoCD server service to LoadBalancer
+      kubernetes.core.k8s:
+        state: present
+        api_version: v1
+        kind: Service
+        name: argocd-server
+        namespace: "{{ argocd_namespace }}"
+        definition:
+          spec:
+            type: LoadBalancer
+            
+    - name: Get ArgoCD server service details
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Service
+        name: argocd-server
+        namespace: "{{ argocd_namespace }}"
+      register: argocd_service
+      
+    - name: Display ArgoCD server service details
+      debug:
+        msg: "{{ argocd_service.resources[0] }}"
