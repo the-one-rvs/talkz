@@ -2,6 +2,7 @@ mongodb:
   enabled: true
   image: mongo:6
   storage: 5Gi
+  storageClassName: gp2
   port: 27017
 
 redis:
