@@ -1,4 +1,4 @@
-import { ApiResponse } from "../../../login/src/utils/ApiResponse.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { Message } from "../model/message.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
