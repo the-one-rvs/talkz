@@ -43,7 +43,7 @@ variable "instance_type" {
 variable "desired_capacity" {
   description = "Desired number of nodes in the node group"
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "min_size" {
@@ -55,7 +55,7 @@ variable "min_size" {
 variable "max_size" {
   description = "Maximum number of nodes in the node group"
   type        = number
-  default     = 3
+  default     = 4
 }
 
 variable "aws_access_key" {

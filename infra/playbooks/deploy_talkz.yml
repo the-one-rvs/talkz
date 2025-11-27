@@ -1,0 +1,107 @@
+---
+- name: Deploy Talkz Application to EKS
+  hosts: localhost
+  gather_facts: false
+  vars:
+    kubeconfig_script: "{{ playbook_dir }}/kubeconfig_command.sh"
+    talkz_namespace: talkz
+    manifests_dir: "{{ playbook_dir }}/../../manifests"
+    secrets_file: "{{ manifests_dir }}/secrets/secrets.yaml"
+    apps_file: "{{ manifests_dir }}/apps.yaml"
+  
+  tasks:
+    - name: Check if kubeconfig_command.sh exists
+      stat:
+        path: "{{ kubeconfig_script }}"
+      register: kubeconfig_file
+      
+    - name: Fail if kubeconfig script not found
+      fail:
+        msg: "kubeconfig_command.sh not found in {{ playbook_dir }}. Please run terraform to generate it first."
+      when: not kubeconfig_file.stat.exists
+      
+    - name: Make kubeconfig script executable
+      file:
+        path: "{{ kubeconfig_script }}"
+        mode: '0755'
+        
+    - name: Configure kubectl access
+      command: "{{ kubeconfig_script }}"
+      register: kubectl_config
+      changed_when: true
+      
+    - name: Display kubectl configuration result
+      debug:
+        msg: "{{ kubectl_config.stdout }}"
+        
+    - name: Create talkz namespace
+      kubernetes.core.k8s:
+        name: "{{ talkz_namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+        
+    - name: Check if secrets file exists
+      stat:
+        path: "{{ secrets_file }}"
+      register: secrets_file_stat
+      
+    - name: Fail if secrets file not found
+      fail:
+        msg: "Secrets file not found at {{ secrets_file }}"
+      when: not secrets_file_stat.stat.exists
+      
+    - name: Apply secrets to talkz namespace
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ secrets_file }}"
+        namespace: "{{ talkz_namespace }}"
+        
+    - name: Check if apps file exists
+      stat:
+        path: "{{ apps_file }}"
+      register: apps_file_stat
+      
+    - name: Fail if apps file not found
+      fail:
+        msg: "Apps file not found at {{ apps_file }}"
+      when: not apps_file_stat.stat.exists
+      
+    - name: Apply apps configuration
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ apps_file }}"
+        namespace: "{{ talkz_namespace }}"
+        
+    - name: Wait for deployments to be ready
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        namespace: "{{ talkz_namespace }}"
+      register: deployments
+      until: deployments.resources | selectattr('status.availableReplicas', 'defined') | list | length > 0
+      retries: 30
+      delay: 10
+      ignore_errors: true
+      
+    - name: Get all pods in talkz namespace
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: "{{ talkz_namespace }}"
+      register: talkz_pods
+      
+    - name: Display pod status
+      debug:
+        msg: "{{ talkz_pods.resources | map(attribute='metadata.name') | list }}"
+        
+    - name: Get all services in talkz namespace
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Service
+        namespace: "{{ talkz_namespace }}"
+      register: talkz_services
+      
+    - name: Display services
+      debug:
+        msg: "{{ talkz_services.resources | map(attribute='metadata.name') | list }}"
