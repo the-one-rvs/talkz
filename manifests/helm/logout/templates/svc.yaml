@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ .Values.svcName }}
   labels:
-    app: {{ .Values.svcName }}
+    app: {{ .Values.deploymentName }}
 spec:
   type: {{ .Values.service.type }}
   selector:
