@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: {{ .Values.svcName }}
   labels:
-    app: {{ .Values.svcName }}
+    app: {{ .Values.deploymentName }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: {{ .Values.svcName }}
+    app: {{ .Values.deploymentName }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
