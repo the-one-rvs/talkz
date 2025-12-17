@@ -5,7 +5,7 @@ svcName: talkz-login-svc
 
 image:
   repository: quasarcelestio/talkz-login
-  tag: "0.0.4"
+  tag: "0.0.5"
   pullPolicy: IfNotPresent
 
 service:
