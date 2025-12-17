@@ -25,13 +25,8 @@ spec:
           volumeMounts:
             - name: mongodb-data
               mountPath: /data/db
-  volumeClaimTemplates:
-    - metadata:
-        name: mongodb-data
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: {{ .Values.mongodb.storageClassName | default "gp2" }}
-        resources:
-          requests:
-            storage: {{ .Values.mongodb.storage }}
+      volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
 {{- end }}
