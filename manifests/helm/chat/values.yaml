@@ -5,7 +5,7 @@ svcName: talkz-chat-svc
 
 image:
   repository: quasarcelestio/talkz-chat
-  tag: "0.0.0"
+  tag: "0.0.4"
   pullPolicy: IfNotPresent
 
 service:
