@@ -58,10 +58,10 @@ const tokens = asyncHandler( async (req, res) => {
             window.close();
             } else {
             // If no opener, navigate in this window
-            window.location.href = 'http://localhost:5173/chat';
+            window.location.href = 'http://localhost:3030/chat';
             }
         } catch (e) {
-            // window.location.href = 'http://localhost:5173/chat';
+            // window.location.href = 'http://localhost:3030/chat';
             console.log(e)
         }
         </script>
