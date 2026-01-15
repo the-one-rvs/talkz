@@ -54,7 +54,7 @@ const tokens = asyncHandler( async (req, res) => {
         try {
             if (window.opener && !window.opener.closed) {
             // Redirect parent and then close popup
-            window.opener.location.href = 'http://localhost:5173/chat';
+            window.opener.location.href = 'http://localhost:3030/chat';
             window.close();
             } else {
             // If no opener, navigate in this window

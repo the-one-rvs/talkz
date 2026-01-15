@@ -4,6 +4,7 @@ import { prometheusMiddleware } from "./middleware/prom.middleware.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 app.use(bodyParser.json()); 
 
@@ -15,6 +16,16 @@ app.use(cors({
 app.use(express.json({limit: "20kb"}))
 app.use(express.urlencoded({extended: true, limit: "20kb" }))
 app.use(cookieParser());
+
+app.use(
+  "/socket.io",
+  createProxyMiddleware({
+    target: "http://chat:5058",
+    ws: true,
+    changeOrigin: true,
+    logLevel: "debug",
+  })
+);
 
 import { register } from "./metrics.js";
 import { setProxies } from "./proxy.js";
