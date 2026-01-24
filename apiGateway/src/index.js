@@ -1,7 +1,8 @@
-import dotenv from 'dotenv';
-dotenv.config({
-    path: './env'
-});
+import dotenv from "dotenv";
+
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config({ path: "./.env" });
+}
 import { app } from "./app.js" ;
 import connectDB from './db/connectDB.js';
 connectDB()
