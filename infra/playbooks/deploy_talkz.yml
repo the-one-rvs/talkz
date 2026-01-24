@@ -7,7 +7,7 @@
     talkz_namespace: talkz
     manifests_dir: "{{ playbook_dir }}/../../manifests"
     secrets_file: "{{ manifests_dir }}/secrets/secrets.yaml"
-    apps_file: "{{ manifests_dir }}/apps.yaml"
+    run_script: "{{ manifests_dir }}/run.sh"
   
   tasks:
     - name: Check if kubeconfig_command.sh exists
@@ -57,21 +57,29 @@
         src: "{{ secrets_file }}"
         namespace: "{{ talkz_namespace }}"
         
-    - name: Check if apps file exists
+    - name: Check if run script exists
       stat:
-        path: "{{ apps_file }}"
-      register: apps_file_stat
+        path: "{{ run_script }}"
+      register: run_script_stat
       
-    - name: Fail if apps file not found
+    - name: Fail if run script not found
       fail:
-        msg: "Apps file not found at {{ apps_file }}"
-      when: not apps_file_stat.stat.exists
+        msg: "Run script not found at {{ run_script }}"
+      when: not run_script_stat.stat.exists
       
-    - name: Apply apps configuration
-      kubernetes.core.k8s:
-        state: present
-        src: "{{ apps_file }}"
-        namespace: "{{ talkz_namespace }}"
+    - name: Make run script executable
+      file:
+        path: "{{ run_script }}"
+        mode: '0755'
+        
+    - name: Run the deployment script
+      command: "{{ run_script }}"
+      register: run_result
+      changed_when: true
+      
+    - name: Display run script result
+      debug:
+        msg: "{{ run_result.stdout }}"
         
     - name: Wait for deployments to be ready
       kubernetes.core.k8s_info:
