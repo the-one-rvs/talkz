@@ -67,9 +67,10 @@ const reclaimTokens = asyncHandler(async (req,res) => {
         }
     
         const options = {
-            httpOnly: true,
-            secure: false
+            secure: false,
+            httpOnly: true
         }
+        
         const op = tokenCreationDuration.startTimer();
         const accessToken = jwt.sign(
             {
