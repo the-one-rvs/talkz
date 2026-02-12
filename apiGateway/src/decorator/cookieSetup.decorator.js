@@ -6,7 +6,7 @@ export const interceptResponse = (proxyRes, req, res) => {
   const refreshToken = proxyRes.headers['x-refresh-token'];
   const options = {
     httpOnly: true,
-    secure: true
+    secure: false
   }
   
 
