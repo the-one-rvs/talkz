@@ -5,7 +5,7 @@ svcName: talkz-oauth-svc
 
 image:
   repository: quasarcelestio/talkz-oauth
-  tag: "1.0.1"
+  tag: "1.0.2"
   pullPolicy: IfNotPresent
 
 service:
