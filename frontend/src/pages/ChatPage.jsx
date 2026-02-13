@@ -187,10 +187,11 @@ export default function ChatPage() {
   // Socket setup
   useEffect(() => {
     if (!user) return;
-    const socketClient = io(import.meta.env.VITE_SOCKET_URL, {
+    const socketClient = io("/socket", {
       withCredentials: true,
       transports: ["websocket"],
     });
+    
     dispatch(setSocket(socketClient));
 
     socketClient.on("receive-message", async (msg) => {
