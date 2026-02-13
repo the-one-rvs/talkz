@@ -54,14 +54,14 @@ const tokens = asyncHandler( async (req, res) => {
         try {
             if (window.opener && !window.opener.closed) {
             // Redirect parent and then close popup
-            window.opener.location.href = 'http://localhost:3030/chat';
+            window.opener.location.href = 'https://codepanda.me/chat';
             window.close();
             } else {
             // If no opener, navigate in this window
-            window.location.href = 'http://localhost:3030/chat';
+            window.location.href = 'https://codepanda.me/chat';
             }
         } catch (e) {
-            // window.location.href = 'http://localhost:3030/chat';
+            // window.location.href = 'https://codepanda.me/chat;
             console.log(e)
         }
         </script>
