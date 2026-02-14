@@ -187,7 +187,7 @@ export default function ChatPage() {
   // Socket setup
   useEffect(() => {
     if (!user) return;
-    const socketClient = io("/socket", {
+    const socketClient = io("/socket.io/", {
       withCredentials: true,
       transports: ["websocket"],
     });
