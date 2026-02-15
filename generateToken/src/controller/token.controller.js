@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import { accessTokenCreateCounter, mongoOP, refreshTokenCreateCounter, tokenCreationDuration } from "../metrics.js";
 import { User } from "../model/user.model.js";
+import redis from "../utils/redisClient.js";
 
 const genratetokens = asyncHandler(async (req,res) => {
     try {
@@ -34,6 +35,8 @@ const genratetokens = asyncHandler(async (req,res) => {
                 expiresIn: process.env.REFRESH_TOKEN_EXPIRY
             }
         )
+        const redis_key = `users:profile`;
+        await redis.del(redis_key);
         op()
         accessTokenCreateCounter.inc()
         refreshTokenCreateCounter.inc()
